@@ -1,0 +1,37 @@
+@startuml
+
+title Class Diagram RepositoryAnalysis
+
+package myapp <<Folder>> {
+  class init
+}
+
+package control <<Folder>> {
+  class main
+}
+
+package util <<Folder>> {
+  class utilidades
+}
+
+package services <<Folder>> {
+  class repositorio
+}
+
+package config <<Folder>> {
+  class db
+}
+
+package database <<Database>> {
+  class myappdb
+}
+
+
+init --> db
+init --> main
+db --> myappdb
+main --> repositorio
+repositorio --> db
+main --> utilidades
+
+@enduml

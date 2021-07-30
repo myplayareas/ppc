@@ -8,17 +8,17 @@ import logging
 from threading import Thread
 from queue import Queue
 import time
-from pydriller import Repository
 from flask import redirect
-import time
 import uuid
 from functools import wraps
 from flask import current_app, request, abort
 from werkzeug.exceptions import HTTPException, InternalServerError
 from myapp.config.db import get_db
 import datetime
-
-logging.basicConfig(format='%(levelname)s - %(asctime)s.%(msecs)03d: %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
+from myapp.utils.utilidades import display
+from myapp.utils.utilidades import dictionaryWithAllCommmits
+from myapp.utils.utilidades import create_work
+from myapp.utils.utilidades import perform_work
 
 bp = Blueprint("main", __name__)
 
@@ -34,65 +34,6 @@ work = Queue()
 finished = Queue()
 
 consumer = None
-
-def display(msg):
-    threadname = threading.current_thread().name
-    processname = multiprocessing.current_process().name
-    logging.info(f'{processname}\{threadname}: {msg}')
-
-# List all Commits from Authors
-# return a dictionary like this: hash, author, date, list of files in commit
-# dictionary = {'hash': ['author', 'date of commit', [file1, file2, ...]]}
-def dictionaryWithAllCommmits(repository):
-    dictionaryAux = {}
-    try: 
-        for commit in Repository(repository).traverse_commits():
-            commitAuthorNameFormatted = '{}'.format(commit.author.name)
-            commitAuthorDateFormatted = '{}'.format(commit.author_date)
-            listFilesModifiedInCommit = []
-            for modification in commit.modified_files:
-                itemMofied = '{}'.format(modification.filename)
-                listFilesModifiedInCommit.append(itemMofied)
-            dictionaryAux[commit.hash] = [commitAuthorNameFormatted, commitAuthorDateFormatted, listFilesModifiedInCommit] 
-    except Exception as e:
-        display(f'Error during processing dictionaryWithAllCommmits in {repository}')
-        dictionaryAux = None
-    return dictionaryAux
-
-# Producer: the client send a request to the queue
-def create_work(client, repository, queue, finished):
-    #lock
-    finished.put(False)
-    # insert element in queue
-    my_request = (client, repository)
-    queue.put(my_request)
-    display(f'Producing request from client {client} and {repository} ')
-    finished.put(True)
-    #unlock 
-    display(f'The request {my_request} has finished')
-
-def create_new_thread(repository):
-    thread = Thread(target=dictionaryWithAllCommmits, args=[repository], daemon=True) 
-    display('It was created a new Thread ' + thread.getName() + ' to process repository ' + repository)
-    thread.start()
-    thread.join()
-    display('Thread ' + thread.getName() + ' finished processing of repository ' + repository)
-
-# Consumer - For each request inserted in the Queue the consumer fire one thread to process each repository stored in the Queue
-def perform_work(work, finished):
-    counter = 0
-    while True:
-        if not work.empty():
-            v = work.get()
-            display(f'Consuming {counter}: {v}')
-            print(f'Cloning repository {v[1]} from client {v[0]}')
-            create_new_thread(v[1])
-            counter += 1
-        else:
-            q = finished.get()
-            if q == True:
-                break
-        display(f'The item {v} has consumed with success!')
 
 def flask_async(f):
     """
@@ -147,18 +88,10 @@ def foo_results(task_id):
         return {'TaskID': task_id}, 202
     return task['result']
 
-def inserir_repositorio(name, link):
-    # Conecta com o banco para inserir um novo repositorio
-    db = get_db()
-    query_insert = "INSERT INTO repository (name, link, user_id, creation_date, analysis_date, analysed) VALUES (?, ?, ?, ?, ?, ?)"
-    db.execute(
-        query_insert,(name, link, 1, datetime.datetime.now(), datetime.datetime.now(), 1),
-    )
-
-@bp.route("/criar")
-def criar():
+@bp.route("/produzir")
+def produzir_repositorios():
     # Create the threads producer to insert requests in the Queue
-    c1 = Thread(target=create_work, args=['client1', list_of_repositories[0],  work, finished], daemon=True)
+    c1 = Thread(target=create_work, args=['client1', list_of_repositories[0], work, finished], daemon=True)
     c2 = Thread(target=create_work, args=['client2', list_of_repositories[1], work, finished], daemon=True)
     c3 = Thread(target=create_work, args=['client3', list_of_repositories[2], work, finished], daemon=True)
     
@@ -171,16 +104,11 @@ def criar():
     for each in list_of_producers:
         each.start()
 
-    return '<p> Criada requisição de repositórios. <a href="/listar">Listar</a>'
+    return '<p> Criada requisição de repositórios. <a href="/processar">Processar repositórios</a>'
 
-def listar_repositorios():
-    db = get_db()
-    query = "select * from repository where user_id = ?"
-    repositorios = db.execute( query , (id,) ).fetchall()
-
-@bp.route("/listar")
+@bp.route("/processar")
 @flask_async
-def listar():
+def processar_em_background():
     repositorios_concatenados = ""
     for each in list_of_repositories:
         repositorios_concatenados = repositorios_concatenados + each + ", "
