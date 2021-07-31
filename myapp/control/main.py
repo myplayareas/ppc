@@ -28,6 +28,7 @@ from myapp.utils.utilidades import create_new_thread_default
 from myapp.services.repositorio import listar_repositorios_usuario
 from myapp.services.repositorio import listar_repositorios
 from myapp.services.repositorio import atualiza_repositorio
+from myapp.services.repositorio import buscar_repositorio_por_nome
 
 bp = Blueprint("main", __name__, url_prefix='/main') 
 
@@ -115,35 +116,59 @@ def produzir_repositorios(repositorios, work, finished):
         
     return url_for('main.processar_em_background')
 
+def repositorios_ja_existem(lista_de_repositorios):
+    lista_de_repositorios_ja_existem = list()
+    try: 
+        for each in lista_de_repositorios:
+            resultado = buscar_repositorio_por_nome(each)
+            if len(resultado) > 0:
+                lista_de_repositorios_ja_existem.append( resultado )
+    except Exception as e:
+        print(f'Erro ao consultar repositorio no banco: {e}')
+    return lista_de_repositorios_ja_existem
+
 @bp.route("/criar", methods=["GET", "POST"])
 @login_required
 def criar():
     """Create a new repository for the current user."""
     if request.method == "POST":
-        cadeia_de_repositorios = request.form["repositorios"]
-        lista_de_repositorios = cadeia_de_repositorios.split(",")
         error = None
         error_processing_repository = None
+        cadeia_de_repositorios = request.form["repositorios"]
 
-        if len(lista_de_repositorios) == 0:
-            error = "List is required."
-
-        if error is not None:
+        # Nenhum repositorio foi passado
+        if len(cadeia_de_repositorios) == 0:
+            error = "List of repositories is required."
             flash(error, 'danger')
+            return render_template("main/criar.html")
         else:
-            try:
-                # Processa o repositorio para gerar a nuvem de arquivos mais modificados
-                link_processar_repositorios = produzir_repositorios(lista_de_repositorios, work, finished)
-                # Limpa a lista de string de repositórios
-                lista_de_repositorios.clear()
-            except Exception as e:
-                error_processing_repository = "Erro na produção dos repositorios" + e
-                if error_processing_repository is not None:
-                    flash(error_processing_repository, 'danger')
-                    return redirect(url_for("main.index"))
-            message = "Repositórios criado com sucesso!"
-            flash(message, 'success')
-            return redirect(url_for("main.index"))
+            lista_de_repositorios = cadeia_de_repositorios.split(",")
+            testa_repositorios = repositorios_ja_existem(lista_de_repositorios)
+
+        # Checa se ja existe algum repositorio no banco
+        if len(testa_repositorios) > 0: 
+            lista = list()
+            for each in testa_repositorios:
+                lista.append(each[0]['name'])
+
+            error = f'O(s) repositorio(s) {lista} já foi cadastrado(s) no banco!'
+            flash(error, 'danger')
+            return render_template("main/criar.html")
+
+        try:
+            # Processa o repositorio para gerar a nuvem de arquivos mais modificados
+            link_processar_repositorios = produzir_repositorios(lista_de_repositorios, work, finished)
+            # Limpa a lista de string de repositórios
+            lista_de_repositorios.clear()
+        except Exception as e:
+            error_processing_repository = "Erro na produção dos repositorios" + e
+            if error_processing_repository is not None:
+                flash(error_processing_repository, 'danger')
+                return redirect(url_for("main.index"))
+        
+        message = "Repositório(s) criado(s) com sucesso!"
+        flash(message, 'success')
+        return redirect(url_for("main.index"))
 
     return render_template("main/criar.html")
 
