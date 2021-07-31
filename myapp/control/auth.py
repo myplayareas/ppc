@@ -10,7 +10,6 @@ from flask import session
 from flask import url_for
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-from myapp.config.db import get_db
 from myapp.services.usuario import busca_usuario
 from myapp.services.usuario import cria_usuario
 from myapp.services.usuario import busca_usuario_por_id

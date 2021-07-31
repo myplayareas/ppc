@@ -28,6 +28,18 @@ package database <<Database>> {
   class myappdb
 }
 
+package views <<Views>> {
+  package m <<Folder>> {
+    class listar
+    class criar
+  }
+
+  package a <<Folder>> {
+    class login
+    class register
+  }
+
+}
 
 init --> db
 init --> main
@@ -38,5 +50,9 @@ repositorio --> db
 main --> utilidades
 auth --> usuario
 usuario --> db
+listar --> main 
+criar --> main
+login --> auth 
+register --> auth
 
 @enduml
