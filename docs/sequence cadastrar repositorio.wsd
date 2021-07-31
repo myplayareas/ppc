@@ -1,0 +1,33 @@
+@startuml
+actor       User as user
+boundary    Principal as principal
+boundary    TelaRepositorio as telaRepositorio
+control     Control.Main as main
+control     Util.Utilidades as utilidades
+entity      Service.Repositorio  as repositorio
+queue       Queue as fila
+database    Database as banco 
+
+user -> principal : seleciona cadastrar
+principal -> main : cadastrar repositorio(s)
+main -> telaRepositorio : mostrar tela 
+telaRepositorio -> main : cadastrar reposiorio(s)
+main -> main : criar
+main -> main : validar dados
+main -> repositorio : checar repositorios(s)
+repositorio -> banco : busca respositorio(s)
+banco --> repositorio : resposta
+repositorio --> main : resposta
+main -> main : produzir repositorio(s)
+    group Thread Produtor
+    main -> utilidades : disparar uma thread de \n acompanhamento (Produtor)
+    utilidades -> utilidades : cria thread de \n enfileiramento
+    utilidades -> fila : enfilera repositorio(s)
+    utilidades -> main : volta ao fluxo normal
+    end
+main -> repositorio : cadastra repositorio(s)
+repositorio -> banco : salva repositorio(s)
+banco --> repositorio : resposta
+repositorio --> main : resposta
+main --> principal : repositorio(s) cadastrado(s)
+@enduml

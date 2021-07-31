@@ -1,0 +1,16 @@
+@startuml
+actor       User    as user
+boundary    Principal as principal
+boundary    Login    as login
+control     Control.Auth     as auth
+entity      Service.Usuario  as usuario
+database    Database as banco 
+
+user -> login : preenche
+login -> auth : autentica
+auth -> usuario : chama
+usuario -> banco : busca
+banco --> usuario : responde
+usuario --> auth : responde
+auth -> principal : mostra
+@enduml

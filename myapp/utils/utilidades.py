@@ -49,30 +49,30 @@ def create_work(client, repository, queue, finished):
     # insert element in queue
     my_request = (client, repository)
     queue.put(my_request)
-    display(f'Producing request from client {client} and {repository} ')
+    display(f'Producing request from client {client} and {repository} to enqueue')
     finished.put(True)
     #unlock 
-    display(f'The request {my_request} has finished')
+    display(f'The request {my_request} has done')
 
 def create_new_thread_banco(repository):
     thread = Thread(target=atualizar_repositorio, args=[repository], daemon=True)
     display('It was created a new Thread ' + thread.getName() + ' to access database to update repository ' + repository)
     thread.start()
+    display('Thread ' + thread.getName() + ' save ' + repository + 'in the database')
     thread.join()
-    display('Thread ' + thread.getName() + ' finished processing of repository ' + repository + 'in the database')
 
 def create_new_thread(repository):
     thread = Thread(target=dictionaryWithAllCommmits, args=[repository], daemon=True) 
-    display('It was created a new Thread ' + thread.getName() + ' to process repository ' + repository)
+    display('It was created a new Thread ' + thread.getName() + ' to analyse repository ' + repository)
     thread.start()
     thread.join()
-    display('Thread ' + thread.getName() + ' finished processing of repository ' + repository)
+    display('Thread ' + thread.getName() + ' finished analysing of repository ' + repository)
     
 def create_new_thread_default(argumentos):
     thread = Thread(target=create_work, args=[argumentos[0], argumentos[1], argumentos[2], argumentos[3]], daemon=True)
-    display('It was created a new Thread ' + thread.getName() + ' to process repository ' + argumentos[1])
+    display('It was created a new Thread ' + thread.getName() + ' to enqueue repository ' + argumentos[1])
     thread.start()
-    display('Thread ' + thread.getName() + ' finished processing of repository ' + argumentos[1])
+    display('Thread ' + thread.getName() + ' finished enqueueing of repository ' + argumentos[1])
     return thread
 
 # Consumer - For each request inserted in the Queue the consumer fire one thread to process each repository stored in the Queue
