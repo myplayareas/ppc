@@ -14,3 +14,25 @@ def criar_repositorio(name, link):
     db.execute(
         query_insert,(name, link, 1, datetime.datetime.now(), datetime.datetime.now(), 1),
     )
+    db.commit()
+
+def listar_repositorios_usuario(id):
+    db = get_db()
+    query = "select * from repository where user_id = ?"
+    repositorios = db.execute( query , (id,) ).fetchall()
+    return repositorios
+
+def buscar_repositorio_por_nome(name):
+    db = get_db()
+    query = "select * from repository where name = ?"
+    repositorio = db.execute( query , (name,) ).fetchall()
+    return repositorio
+
+def atualiza_repositorio(name, analysed):
+    analysis_date = datetime.datetime.now()
+    query = "UPDATE repository SET analysis_date = ?, analysed = ? WHERE name = ?"
+    db = get_db()
+    db.execute(
+        query, (analysis_date, analysed, name)
+    )
+    db.commit()

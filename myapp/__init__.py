@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from myapp.config import db
 from myapp.control import main
+from myapp.control import auth
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
@@ -26,15 +27,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route("/")
-    def index():
-        return '<p> Bem vindo ao teste de análise de repositórios usando produtor/consumidor e threads'
-
     db.init_app(app)
 
     app.register_blueprint(main.bp)
+    app.register_blueprint(auth.bp)
 
-    # Define a rota principal da aplicacao
-    app.add_url_rule("/", endpoint="index")
+# Define a rota principal da aplicacao
+    app.add_url_rule("/", endpoint="main.index")
 
     return app

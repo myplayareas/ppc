@@ -19,16 +19,27 @@ from myapp.utils.utilidades import display
 from myapp.utils.utilidades import dictionaryWithAllCommmits
 from myapp.utils.utilidades import create_work
 from myapp.utils.utilidades import perform_work
+from flask import url_for
+from myapp.control.auth import login_required
+from flask import render_template
+from flask import flash
+from myapp.services.repositorio import criar_repositorio
+from myapp.utils.utilidades import create_new_thread_default
+from myapp.services.repositorio import listar_repositorios_usuario
+from myapp.services.repositorio import listar_repositorios
+from myapp.services.repositorio import atualiza_repositorio
 
-bp = Blueprint("main", __name__)
+bp = Blueprint("main", __name__, url_prefix='/main') 
 
 tasks = {}
 
-list_of_repositories = ['https://github.com/armandossrecife/restapi.git', 'https://github.com/armandossrecife/sysweb.git', 
-'https://github.com/armandossrecife/spoon-example.git']
-
 # List of producers
 list_of_producers = list()
+
+# Lista da strings de repositorios
+lista_de_repositorios = list()
+
+link_processar_repositorios = ""
 
 work = Queue()
 finished = Queue()
@@ -69,13 +80,21 @@ def flask_async(f):
 
     return wrapped
 
+@bp.route("/")
+@login_required
+def index():
+    lista_de_repositorios = listar_repositorios_usuario(1)
+    return render_template('main/listar.html', my_link=link_processar_repositorios, my_repositories=lista_de_repositorios)
+
 @bp.route('/foo')
+@login_required
 @flask_async
 def foo():
     time.sleep(10)
     return {'Result': True}
 
 @bp.route('/foo/<task_id>', methods=['GET'])
+@login_required
 def foo_results(task_id):
     """
         Return results of asynchronous task.
@@ -88,33 +107,50 @@ def foo_results(task_id):
         return {'TaskID': task_id}, 202
     return task['result']
 
-@bp.route("/produzir")
-def produzir_repositorios():
-    # Create the threads producer to insert requests in the Queue
-    c1 = Thread(target=create_work, args=['client1', list_of_repositories[0], work, finished], daemon=True)
-    c2 = Thread(target=create_work, args=['client2', list_of_repositories[1], work, finished], daemon=True)
-    c3 = Thread(target=create_work, args=['client3', list_of_repositories[2], work, finished], daemon=True)
-    
-    list_of_producers.append(c1)
-    list_of_producers.append(c2)
-    list_of_producers.append(c3)
-    
-    print('Start all clients')
-    # Start the request for each client
-    for each in list_of_producers:
-        each.start()
+def produzir_repositorios(repositorios, work, finished):
+    for each in repositorios: 
+        thread = create_new_thread_default(['client1', each, work, finished])
+        list_of_producers.append(thread)
+        criar_repositorio(each, each)
+        
+    return url_for('main.processar_em_background')
 
-    return '<p> Criada requisição de repositórios. <a href="/processar">Processar repositórios</a>'
+@bp.route("/criar", methods=["GET", "POST"])
+@login_required
+def criar():
+    """Create a new repository for the current user."""
+    if request.method == "POST":
+        cadeia_de_repositorios = request.form["repositorios"]
+        lista_de_repositorios = cadeia_de_repositorios.split(",")
+        error = None
+        error_processing_repository = None
+
+        if len(lista_de_repositorios) == 0:
+            error = "List is required."
+
+        if error is not None:
+            flash(error, 'danger')
+        else:
+            try:
+                # Processa o repositorio para gerar a nuvem de arquivos mais modificados
+                link_processar_repositorios = produzir_repositorios(lista_de_repositorios, work, finished)
+                # Limpa a lista de string de repositórios
+                lista_de_repositorios.clear()
+            except Exception as e:
+                error_processing_repository = "Erro na produção dos repositorios" + e
+                if error_processing_repository is not None:
+                    flash(error_processing_repository, 'danger')
+                    return redirect(url_for("main.index"))
+            message = "Repositórios criado com sucesso!"
+            flash(message, 'success')
+            return redirect(url_for("main.index"))
+
+    return render_template("main/criar.html")
 
 @bp.route("/processar")
+@login_required
 @flask_async
 def processar_em_background():
-    repositorios_concatenados = ""
-    for each in list_of_repositories:
-        repositorios_concatenados = repositorios_concatenados + each + ", "
-    
-    final = "[" + repositorios_concatenados + "]"
-
     # Create the thread consumer repositories stored in the Queue
     consumer = Thread(target=perform_work, args=[work, finished], daemon=True)
 
@@ -125,10 +161,18 @@ def processar_em_background():
     for each in list_of_producers:
         each.join()
         display('Producer ' + each.getName() + ' has finished with success!')
+    list_of_producers.clear()
 
     consumer.join()
     display('Consumer has finished')
-
     display('Finished the main process.')
 
-    return '<p> Lista de repositórios: ' + final
+    return '<p> processamento dos repositórios foi concluído com sucesso!'
+
+""" Mostra a lista de repositorios  """
+@bp.route("/repositorios/usuario/<int:id>")
+@login_required
+def repositorios_usuarios(id):
+    #Carrega repositorios registrados pelo usuario
+    lista_repositorios = listar_repositorios_usuario(id)
+    return render_template("main/repositorios_usuario.html", repositorios=lista_repositorios)

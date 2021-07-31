@@ -8,6 +8,7 @@ package myapp <<Folder>> {
 
 package control <<Folder>> {
   class main
+  class auth
 }
 
 package util <<Folder>> {
@@ -16,6 +17,7 @@ package util <<Folder>> {
 
 package services <<Folder>> {
   class repositorio
+  class usuario
 }
 
 package config <<Folder>> {
@@ -29,9 +31,12 @@ package database <<Database>> {
 
 init --> db
 init --> main
+init --> auth
 db --> myappdb
 main --> repositorio
 repositorio --> db
 main --> utilidades
+auth --> usuario
+usuario --> db
 
 @enduml

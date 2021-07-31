@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Lista principal{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <p> Bem vindo ao teste de análise de repositórios usando produtor/consumidor e threads
+
+  <table>
+  <tr> <th> Lista de Repositórios </th> </tr>
+  {% for each in my_repositories %}
+        <tr role="row">
+        <td >{{ each["link"] }}</td>
+  {% endfor %}
+  </table>
+
+  <br>
+  <a href="{{ url_for('main.criar') }}">Produzir repositórios</a> 
+
+  <div id="processar_em_background">
+    <a href="{{ my_link }}">Processar repositórios</a>
+  </div>
+{% endblock %}
