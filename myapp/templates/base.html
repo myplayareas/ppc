@@ -1,6 +1,10 @@
 <!doctype html>
 <title>{% block title %}{% endblock %} - Flaskr</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script type=text/javascript src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson }};
+</script>
 <nav>
   <h1>Repository Analysis</h1>
   <ul>

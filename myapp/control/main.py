@@ -29,6 +29,7 @@ from myapp.services.repositorio import listar_repositorios_usuario
 from myapp.services.repositorio import listar_repositorios
 from myapp.services.repositorio import atualiza_repositorio
 from myapp.services.repositorio import buscar_repositorio_por_nome
+from flask import jsonify
 
 bp = Blueprint("main", __name__, url_prefix='/main') 
 
@@ -183,10 +184,11 @@ def processar_em_background():
     # Start the consumer of queue of requests
     consumer.start()
 
-    for each in list_of_producers:
-        each.join()
-        display('Producer ' + each.getName() + ' has finished with success!')
-    list_of_producers.clear()
+    if len(list_of_producers) > 0:
+        for each in list_of_producers:
+            each.join()
+            display('Producer ' + each.getName() + ' has finished with success!')
+        list_of_producers.clear()
 
     consumer.join()
     display('Consumer has finished')

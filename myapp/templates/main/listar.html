@@ -5,6 +5,18 @@
 {% endblock %}
 
 {% block content %}
+
+<script type=text/javascript>
+  $(function() {
+    $('a#processar').bind('click', function() {
+      $.getJSON('/main/processar', function(data) {
+        $("#TaskIdProcessar").text(data.TaskId);
+      });
+      return false;
+    });
+  });
+</script>
+
   <p> Bem vindo ao teste de análise de repositórios usando produtor/consumidor e threads
 
   <table>
@@ -24,9 +36,8 @@
   </table>
 
   <br>
-  <a href="{{ url_for('main.criar') }}">Cadastrar repositórios</a> 
+  <a href="{{ url_for('main.criar') }}">Cadastrar novo(s) repositório(s)</a> 
+  <br>
+  <a href='#' id='processar'>Processar o(s) repositório(s) enfileirado(s)</a> <span id='TaskIdProcessar'>?</span>
 
-  <div id="processar_em_background">
-    <a href="{{ my_link }}">Processar repositórios</a>
-  </div>
 {% endblock %}

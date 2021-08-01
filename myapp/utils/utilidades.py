@@ -90,6 +90,7 @@ def perform_work(app, work, finished):
             counter += 1
         else:
             q = finished.get()
+            display(f'There is no itens to consume!')
             if q == True:
                 break
         display(f'The item {v} has consumed with success!')
