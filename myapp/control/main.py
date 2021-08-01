@@ -29,7 +29,9 @@ from myapp.services.repositorio import listar_repositorios_usuario
 from myapp.services.repositorio import listar_repositorios
 from myapp.services.repositorio import atualiza_repositorio
 from myapp.services.repositorio import buscar_repositorio_por_nome
+from myapp.services.repositorio import buscar_repositorio_por_nome_e_usuario
 from flask import jsonify
+from flask import g
 
 bp = Blueprint("main", __name__, url_prefix='/main') 
 
@@ -85,7 +87,7 @@ def flask_async(f):
 @bp.route("/")
 @login_required
 def index():
-    lista_de_repositorios = listar_repositorios_usuario(1)
+    lista_de_repositorios = listar_repositorios_usuario(g.user['id'])
     return render_template('main/listar.html', my_link=link_processar_repositorios, my_repositories=lista_de_repositorios)
 
 @bp.route('/foo')
@@ -110,18 +112,19 @@ def foo_results(task_id):
     return task['result']
 
 def produzir_repositorios(repositorios, work, finished):
+    client = 'client ' + str(g.user['id'])
     for each in repositorios: 
-        thread = create_new_thread_default(['client1', each, work, finished])
+        thread = create_new_thread_default([client, each, work, finished])
         list_of_producers.append(thread)
-        criar_repositorio(each, each)
+        criar_repositorio(each, each, g.user['id'])
         
     return url_for('main.processar_em_background')
 
-def repositorios_ja_existem(lista_de_repositorios):
+def repositorios_ja_existem(lista_de_repositorios, user_id):
     lista_de_repositorios_ja_existem = list()
     try: 
         for each in lista_de_repositorios:
-            resultado = buscar_repositorio_por_nome(each)
+            resultado = buscar_repositorio_por_nome_e_usuario(each, user_id)
             if len(resultado) > 0:
                 lista_de_repositorios_ja_existem.append( resultado )
     except Exception as e:
@@ -144,7 +147,7 @@ def criar():
             return render_template("main/criar.html")
         else:
             lista_de_repositorios = cadeia_de_repositorios.split(",")
-            testa_repositorios = repositorios_ja_existem(lista_de_repositorios)
+            testa_repositorios = repositorios_ja_existem(lista_de_repositorios, g.user['id'])
 
         # Checa se ja existe algum repositorio no banco
         if len(testa_repositorios) > 0: 
