@@ -8,10 +8,18 @@
   <p> Bem vindo ao teste de análise de repositórios usando produtor/consumidor e threads
 
   <table>
-  <tr> <th> Lista de Repositórios </th> </tr>
+  <tr> 
+    <th> Link </th> 
+    <th> Data de criação</th>  
+    <th> Data de análise</th>
+    <th> Status </th> 
+  </tr>
   {% for each in my_repositories %}
         <tr role="row">
-        <td >{{ each["link"] }}</td>
+        <td >{{ each["link"] }}</td> 
+        <td> {{ each["creation_date"].strftime('%d-%m-%Y %H:%M:%S') }} </td> 
+        <td> {{ each["analysis_date"].strftime('%d-%m-%Y %H:%M:%S') }} </td>
+        <td >{{ each["analysed"]}} </td>
   {% endfor %}
   </table>
 

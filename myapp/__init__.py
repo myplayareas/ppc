@@ -32,6 +32,10 @@ def create_app(test_config=None):
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
 
+    with app.app_context():
+        db.get_db()
+        print(f'db.get_db() registrado no contexto {app.name}')
+
 # Define a rota principal da aplicacao
     app.add_url_rule("/", endpoint="main.index")
 

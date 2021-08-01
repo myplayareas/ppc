@@ -1,0 +1,4 @@
+include instance/myapp.sqlite
+graft myapp/static
+graft myapp/templates
+global-exclude *.pyc

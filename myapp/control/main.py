@@ -177,7 +177,7 @@ def criar():
 @flask_async
 def processar_em_background():
     # Create the thread consumer repositories stored in the Queue
-    consumer = Thread(target=perform_work, args=[work, finished], daemon=True)
+    consumer = Thread(target=perform_work, args=[current_app._get_current_object(), work, finished], daemon=True)
 
     print('Start the consumer')
     # Start the consumer of queue of requests

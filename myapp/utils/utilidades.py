@@ -7,14 +7,16 @@ from threading import Thread
 import time
 import datetime
 from pydriller import Repository
-from myapp.services.repositorio import atualiza_repositorio
 from flask import Flask
+from myapp.services.repositorio import atualiza_repositorio
+from flask import current_app
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s.%(msecs)03d: %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
 
-def atualizar_repositorio(repository):
+def atualizar_repositorio(app, repository):
     try:
-        atualiza_repositorio(repository, 2)
+        with app.app_context():
+            atualiza_repositorio(repository, 2)
     except Exception as e:
         display(f'Error during access data base to update in {repository} error: {e}')
 
@@ -54,12 +56,12 @@ def create_work(client, repository, queue, finished):
     #unlock 
     display(f'The request {my_request} has done')
 
-def create_new_thread_banco(repository):
-    thread = Thread(target=atualizar_repositorio, args=[repository], daemon=True)
+def create_new_thread_banco(app, repository):
+    thread = Thread(target=atualizar_repositorio, args=[app, repository], daemon=True)
     display('It was created a new Thread ' + thread.getName() + ' to access database to update repository ' + repository)
     thread.start()
-    display('Thread ' + thread.getName() + ' save ' + repository + 'in the database')
     thread.join()
+    display('Thread ' + thread.getName() + ' save ' + repository + 'in the database')
 
 def create_new_thread(repository):
     thread = Thread(target=dictionaryWithAllCommmits, args=[repository], daemon=True) 
@@ -76,7 +78,7 @@ def create_new_thread_default(argumentos):
     return thread
 
 # Consumer - For each request inserted in the Queue the consumer fire one thread to process each repository stored in the Queue
-def perform_work(work, finished):
+def perform_work(app, work, finished):
     counter = 0
     while True:
         if not work.empty():
@@ -84,7 +86,7 @@ def perform_work(work, finished):
             display(f'Consuming {counter}: {v}')
             print(f'Cloning repository {v[1]} from client {v[0]}')
             create_new_thread(v[1])
-            create_new_thread_banco(v[1])
+            create_new_thread_banco(app, v[1])
             counter += 1
         else:
             q = finished.get()
