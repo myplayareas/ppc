@@ -1,0 +1,25 @@
+@startsalt
+{
+{T
++ Diretório/File        | Descrição
++ PPC        | Diretório do repositório   
+++ app       | Diretório da app standalone
+++ docs      | Arquivos de documentação
+++ instance  | Instância do banco sqlite
+++ myapp     | Diretório da aplicação myapp
++++ control  | Pacote de controladores da aplicação
++++ services | Pacote de serviços da aplicação
++++ config   | Pacote de configuração do banco da aplicação
++++ utils    | Contem o módulo de utilidades compartilhado
++++ templates | Contem os arquivos de views (html) da aplicação
++++ static | Contem os arquivos estáticos (javascript, css, ...) da aplicação 
++++ __init__.py | Script de inicização da aplicação
+++ out       | Diretório de saída de scripts plantUML
+++ MANIFEST.in | Arquivo de manifesto da aplicação para ambiente de produção
+++ README.md | Readme do repositório
+++ setup.cfg | Arquivo de configuração
+++ setup.py  | Script de configuração de ambiente
+++ setvariables | Script bash de configuração das variáveis de ambiente
+}
+}
+@endsalt
