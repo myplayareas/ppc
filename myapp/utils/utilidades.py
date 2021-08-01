@@ -80,6 +80,7 @@ def create_new_thread_default(argumentos):
 # Consumer - For each request inserted in the Queue the consumer fire one thread to process each repository stored in the Queue
 def perform_work(app, work, finished):
     counter = 0
+    v =  None
     while True:
         if not work.empty():
             v = work.get()
@@ -93,4 +94,5 @@ def perform_work(app, work, finished):
             display(f'There is no itens to consume!')
             if q == True:
                 break
-        display(f'The item {v} has consumed with success!')
+        if v is not None: 
+            display(f'The item {v} has consumed with success!')
