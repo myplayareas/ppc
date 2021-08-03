@@ -25,6 +25,7 @@ from flask import render_template
 from flask import flash
 from myapp.services.repositorio import criar_repositorio
 from myapp.utils.utilidades import create_new_thread_default
+from myapp.utils.utilidades import pega_nome_repositorio
 from myapp.services.repositorio import listar_repositorios_usuario
 from myapp.services.repositorio import listar_repositorios
 from myapp.services.repositorio import atualiza_repositorio
@@ -88,6 +89,8 @@ def flask_async(f):
 @login_required
 def index():
     lista_de_repositorios = listar_repositorios_usuario(g.user['id'])
+    print(f'Fila de repositórios: {work.queue}')
+
     return render_template('main/listar.html', my_link=link_processar_repositorios, my_repositories=lista_de_repositorios)
 
 @bp.route('/foo')
@@ -112,11 +115,11 @@ def foo_results(task_id):
     return task['result']
 
 def produzir_repositorios(repositorios, work, finished):
-    client = 'client ' + str(g.user['id'])
+    client = g.user['id']
     for each in repositorios: 
         thread = create_new_thread_default([client, each, work, finished])
         list_of_producers.append(thread)
-        criar_repositorio(each, each, g.user['id'])
+        criar_repositorio(pega_nome_repositorio(each), each, g.user['id'])
         
     return url_for('main.processar_em_background')
 
@@ -124,7 +127,7 @@ def repositorios_ja_existem(lista_de_repositorios, user_id):
     lista_de_repositorios_ja_existem = list()
     try: 
         for each in lista_de_repositorios:
-            resultado = buscar_repositorio_por_nome_e_usuario(each, user_id)
+            resultado = buscar_repositorio_por_nome_e_usuario(pega_nome_repositorio(each), user_id)
             if len(resultado) > 0:
                 lista_de_repositorios_ja_existem.append( resultado )
     except Exception as e:
@@ -155,7 +158,7 @@ def criar():
             for each in testa_repositorios:
                 lista.append(each[0]['name'])
 
-            error = f'O(s) repositorio(s) {lista} já foi cadastrado(s) no banco!'
+            error = f'O(s) repositorio(s) {lista} já foi(forão) cadastrado(s) no banco!'
             flash(error, 'danger')
             return render_template("main/criar.html")
 
@@ -206,3 +209,18 @@ def repositorios_usuarios(id):
     #Carrega repositorios registrados pelo usuario
     lista_repositorios = listar_repositorios_usuario(id)
     return render_template("main/repositorios_usuario.html", repositorios=lista_repositorios)
+
+@bp.context_processor
+def utility_processor():
+    def status_repositorio(status):
+        valor = ''
+        try:
+            lista_de_status = list()
+            lista_de_status = ['Erro','Registrado', 'Analisado']
+            valor = lista_de_status[status]
+        except Exception as e:
+            display('Erro de status: valor ' + valor + ' - status:  ' + str(status) + ' - ' + str(e))
+        return valor
+    return dict(status_repositorio=status_repositorio)
+    
+

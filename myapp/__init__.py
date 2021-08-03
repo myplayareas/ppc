@@ -3,6 +3,7 @@ from flask import Flask
 from myapp.config import db
 from myapp.control import main
 from myapp.control import auth
+from datetime import datetime
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
@@ -28,9 +29,12 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
+    print(f'The application {app.name} was started at {datetime.now()}.')
 
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
+    print(f'The blueprint {main.bp.name} was registered. ')
+    print(f'The blueprint {auth.bp.name} was registered. ')
 
     with app.app_context():
         db.get_db()

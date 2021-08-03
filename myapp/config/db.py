@@ -1,6 +1,5 @@
 # https://flask.palletsprojects.com/en/1.1.x/tutorial/database/
 import sqlite3
-
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
@@ -29,7 +28,7 @@ def init_db():
 
     with current_app.open_resource('config/schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
-        print("O esquema do banco foi carregado com sucesso!")
+        print("O esquema do banco foi iniciado com sucesso!")
 
 # Executa o scrip do banco via init_db()
 @click.command('init-db')
