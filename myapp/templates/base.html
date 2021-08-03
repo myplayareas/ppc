@@ -1,6 +1,9 @@
 <!doctype html>
 <title>{% block title %}{% endblock %} - Flaskr</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jsonview.bundle.css') }}">
+
 <script type=text/javascript src="{{ url_for('static', filename='jquery-3.6.0.min.js') }}"></script>
 <script type=text/javascript>
   $SCRIPT_ROOT = {{ request.script_root|tojson }};

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Resultado da Análise do Repositório{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+    <p> Bem vindo ao teste de análise de repositórios usando produtor/consumidor e threads
+
+  <table>
+  <tr> 
+    <th> Nome </th> 
+    <th> Link </th> 
+    <th> Data de criação</th>  
+    <th> Data de análise</th>
+    <th> Status </th> 
+  </tr>
+        <tr role="row">
+        <td> {{ my_name }} </td>
+        <td >{{ my_link }}</td> 
+        <td> {{ my_creation_date.strftime('%d-%m-%Y %H:%M:%S') }} </td> 
+        <td> {{ my_analysis_date.strftime('%d-%m-%Y %H:%M:%S') }} </td>
+        <td >{{ status_repositorio(my_status) }} </td>
+  </table>
+
+  <div class="root"></div>
+
+  <script type="text/javascript" src="{{ url_for('static', filename='jsonview.bundle.js') }}"></script>
+  <script type="text/javascript">
+    fetch('{{ my_relative_path_file_name }}')
+    .then((res)=> {
+      return res.text();
+    })
+    .then((data) => {
+      const tree = JsonView.createTree(data);
+      JsonView.render(tree, document.querySelector('.root'));
+      JsonView.expandChildren(tree);
+    })
+  </script>
+
+{% endblock %}

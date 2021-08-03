@@ -28,6 +28,12 @@ def buscar_repositorio_por_nome(name):
     repositorio = db.execute( query , (name,) ).fetchall()
     return repositorio
 
+def buscar_repositorio_por_id(id):
+    db = get_db()
+    query = "select * from repository where id = ?"
+    repositorio = db.execute( query , (id,) ).fetchall()
+    return repositorio
+
 def buscar_repositorio_por_nome_e_usuario(name, id):
     db = get_db()
     query = "select * from repository where name = ? and user_id = ?"

@@ -26,6 +26,7 @@
     <th> Data de criação</th>  
     <th> Data de análise</th>
     <th> Status </th> 
+    <th> Detalhes </th>
   </tr>
   {% for each in my_repositories %}
         <tr role="row">
@@ -34,6 +35,7 @@
         <td> {{ each["creation_date"].strftime('%d-%m-%Y %H:%M:%S') }} </td> 
         <td> {{ each["analysis_date"].strftime('%d-%m-%Y %H:%M:%S') }} </td>
         <td >{{ status_repositorio(each["analysed"]) }} </td>
+        <td> <a href="{{ url_for('main.visualizar_analise_repositorio', id=each['id']) }}">Mais...</a></td> 
   {% endfor %}
   </table>
 

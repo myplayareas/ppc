@@ -26,11 +26,13 @@ from flask import flash
 from myapp.services.repositorio import criar_repositorio
 from myapp.utils.utilidades import create_new_thread_default
 from myapp.utils.utilidades import pega_nome_repositorio
+from myapp.utils.utilidades import Constants
 from myapp.services.repositorio import listar_repositorios_usuario
 from myapp.services.repositorio import listar_repositorios
 from myapp.services.repositorio import atualiza_repositorio
 from myapp.services.repositorio import buscar_repositorio_por_nome
 from myapp.services.repositorio import buscar_repositorio_por_nome_e_usuario
+from myapp.services.repositorio import buscar_repositorio_por_id
 from flask import jsonify
 from flask import g
 
@@ -223,4 +225,19 @@ def utility_processor():
         return valor
     return dict(status_repositorio=status_repositorio)
     
+@bp.route("/repositorio/<int:id>/analisado", methods=["GET"])
+@login_required
+def visualizar_analise_repositorio(id):
+    repositorio = buscar_repositorio_por_id(id)
+    link = repositorio[0]['link']
+    name = repositorio[0]['name']
+    creation_date = repositorio[0]['creation_date']
+    analysis_date = repositorio[0]['analysis_date']
+    status = repositorio[0]['analysed']
 
+    relative_path = 'repositories' + '/' + str(g.user['id']) + '/' + name + '.json'
+    relative_path_file_name = url_for('static', filename=relative_path)
+
+    return render_template("main/analisado.html", my_link=link, my_name=name, my_creation_date=creation_date,
+                                my_analysis_date=analysis_date, my_status=status,
+                                my_relative_path_file_name=relative_path_file_name)
