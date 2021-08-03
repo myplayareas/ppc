@@ -5,7 +5,7 @@ boundary    TelaRepositorio as telaRepositorio
 control     Control.Main as main
 control     Util.Utilidades as utilidades
 entity      Service.Repositorio  as repositorio
-queue       Queue as fila
+queue       Queue.Repositorios as fila
 database    Database as banco 
 
 user -> principal : seleciona cadastrar

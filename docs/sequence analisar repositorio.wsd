@@ -4,27 +4,46 @@ boundary    Principal as principal
 control     Control.Main as main
 control     Util.Utilidades as utilidades
 entity      Service.Repositorio  as repositorio
-queue       Queue as fila
+queue       Queue.Repositorios as filarepositorios
+queue       Queue.Dicionarios as filadicionarios
 database    Database as banco 
+collections  FileSystem as arquivo
 
 user -> principal : seleciona analisar
 principal -> main : analisar repositorio(s) \n (Processar em Backgroud)
 main -> main : checar repositorios(s) \n para analise
 main -> main : consumidor dos repositorio(s)
-    group Thread Consumidor
-    main -> utilidades : disparar uma thread de \n acompanhamento (Consumidor)
-    utilidades -> utilidades : cria thread para consumir \n elementos da fila
-    utilidades -> fila : consome repositorio
+    group Thread Consumidor Repositorio(s)
+    main -> utilidades : disparar uma thread de \n acompanhamento do(s) repositorios
+    utilidades -> utilidades : cria thread para consumir \n elementos da fila repositorio
+    utilidades -> filarepositorios : consome repositorio(s) da fila repositorio
         group Thread Analisar
-            utilidades -> utilidades : cria nova thread para \n analisar repositorio
+            utilidades -> utilidades : cria nova thread para \n analisar o(s) repositorio(s)
+            utilidades -> utilidades : gera dicionario com detalhes da analise do repositorio
+            group Thread Produtor Dicionario(s)
+                main -> utilidades : disparar uma thread de \n acompanhamento do(s) dicionario(s)  
+                utilidades -> utilidades : cria thread de \n enfileiramento de dicionario(s)
+                utilidades -> filadicionarios : enfilera o(s) dicionario(s) gerados
+                utilidades -> utilidades : volta ao fluxo normal
+            end
         end
         group Thread Acessa Banco
-            utilidades -> utilidades : cria nova thread para \n atualizar status \n do repositorio no banco
-            utilidades -> repositorio : atualiza status \n do repositorio
-            repositorio -> banco : salva repositorio
+            utilidades -> utilidades : cria nova thread para \n atualizar status \n do(s) repositorio(s) no banco
+            utilidades -> repositorio : atualiza status \n do(s) repositorio(s)
+            repositorio -> banco : salva o(s) repositorio(s)
             banco --> repositorio : resposta
             repositorio --> utilidades : resposta
         end 
+        group Thread Consumidor Dicionario(s)
+            utilidades -> utilidades : processa fila de dicionarios \n em background
+            utilidades --> filadicionarios : consome o(s) dicionario(s) \n da fila de dicionarios
+            group Thread Salva Dicionario em Arquivo JSON
+                utilidades -> utilidades : cria nova thread para \n salvar os detalhes de analise \n em arquivo JSON
+                utilidades -> arquivo : salva o(s) arquivo(s) json
+                arquivo --> utilidades : resposta
+            end             
+            utilidades -> utilidades : volta ao fluxo normal
+        end
         utilidades -> main : volta para o fluxo principal
     end
 main --> principal : repositorio(s) analisados(s)

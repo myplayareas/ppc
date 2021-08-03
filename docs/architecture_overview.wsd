@@ -13,6 +13,7 @@ package control <<Folder>> {
 
 package util <<Folder>> {
   class utilidades
+  class manipula_arquivos
 }
 
 package services <<Folder>> {
@@ -32,6 +33,7 @@ package views <<Views>> {
   package m <<Folder>> {
     class listar
     class criar
+    class analisado
   }
 
   package a <<Folder>> {
@@ -48,10 +50,13 @@ db --> myappdb
 main --> repositorio
 repositorio --> db
 main --> utilidades
+utilidades --> manipula_arquivos
+utilidades --> repositorio
 auth --> usuario
 usuario --> db
 listar --> main 
 criar --> main
+analisado --> main
 login --> auth 
 register --> auth
 
