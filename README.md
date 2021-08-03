@@ -48,16 +48,16 @@ flask run
 
 6.1 Login (OK)
 
-6.2 Register a new user
+6.2 Register a new user (OK)
 
-6.3 List of repositories of the logged in user (OK)
+6.3 Create new repository (OK)
 
-6.4 Create new repository
+6.4 View created repository (OK)
 
-6.5 View created repository
+6.5 Analyse the repository (OK)
 
-6.6 Analyse the repository
+6.6 View details about analysed repository (OK)
 
 ![Tela Principal](https://github.com/myplayareas/ppc/blob/main/docs/TelaPrincipal.png)
 
-[![asciicast](https://asciinema.org/a/428273.svg)](https://asciinema.org/a/428273)
+[![asciicast](https://asciinema.org/a/428602.svg)](https://asciinema.org/a/428602)
