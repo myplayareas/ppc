@@ -1,7 +1,6 @@
 from myapp.config.db import get_db
 import datetime
-from werkzeug.security import check_password_hash
-from werkzeug.security import generate_password_hash
+from werkzeug import security
 
 def busca_usuario(username):
     query = 'SELECT * FROM user WHERE username = ?'
@@ -21,6 +20,6 @@ def cria_usuario(name, username, email, password):
     db = get_db()
     db.execute(
                 query,
-                (name, username, email, generate_password_hash(password))
+                (name, username, email, security.generate_password_hash(password))
             )
     db.commit()

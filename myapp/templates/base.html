@@ -9,7 +9,7 @@
   $SCRIPT_ROOT = {{ request.script_root|tojson }};
 </script>
 <nav>
-  <h1>Repository Analysis</h1>
+  <h1>Repository Analysis</h1><a href="{{ url_for('main.index') }}"> Home</a>
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['username'] }}</span>

@@ -1,5 +1,4 @@
 @startuml
-
 title Class Diagram RepositoryAnalysis
 
 package myapp <<Folder>> {
@@ -17,8 +16,8 @@ package util <<Folder>> {
 }
 
 package services <<Folder>> {
-  class repositorio
-  class usuario
+  class repositorios
+  class usuarios
 }
 
 package config <<Folder>> {
@@ -47,13 +46,13 @@ init --> db
 init --> main
 init --> auth
 db --> myappdb
-main --> repositorio
-repositorio --> db
+main --> repositorios
+repositorios --> db
 main --> utilidades
 utilidades --> manipula_arquivos
-utilidades --> repositorio
-auth --> usuario
-usuario --> db
+utilidades --> repositorios
+auth --> usuarios
+usuarios --> db
 listar --> main 
 criar --> main
 analisado --> main

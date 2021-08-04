@@ -8,11 +8,11 @@ import time
 import datetime
 from pydriller import Repository
 from flask import Flask
-from myapp.services.repositorio import atualiza_repositorio
+from myapp.services import repositorios
 from flask import current_app
 import os
 import random
-from myapp.utils.manipula_arquivos import save_dictionary_in_json_file
+from myapp.utils import manipula_arquivos
 from queue import Queue
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s.%(msecs)03d: %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
@@ -26,14 +26,14 @@ finished_of_dictionaries = Queue()
 def atualizar_repositorio(app, repository):
     try:
         with app.app_context():
-            atualiza_repositorio(pega_nome_repositorio(repository), 2)
+            repositorios.atualiza_repositorio(pega_nome_repositorio(repository), 2)
     except Exception as e:
         display(f'Error during access data base to update in {repository} error: {e}')
 
 def salvar_dicionario_em_arquivo_json(app, name, user_id, my_dictionary, path_repositories):
     try:
         with app.app_context():
-            save_dictionary_in_json_file(name, user_id, my_dictionary, path_repositories)
+            manipula_arquivos.save_dictionary_in_json_file(name, user_id, my_dictionary, path_repositories)
     except Exception as e:
         display(f'Error during try to save the dictionary {name} as a json file!: {e}')
     
