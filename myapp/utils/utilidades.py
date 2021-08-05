@@ -76,22 +76,22 @@ def create_new_thread_banco(app, repository):
     thread.join()
     display('Thread ' + thread.getName() + ' save ' + repository + 'in the database')
 
-def create_new_thread(client, repository):
+def create_new_thread_analyse_commits(client, repository):
     thread = Thread(target=dictionaryWithAllCommmits, args=[client, repository], daemon=True) 
     display('It was created a new Thread ' + thread.getName() + ' to analyse repository ' + repository)
     thread.start()
     thread.join()
     display('Thread ' + thread.getName() + ' finished analysing of repository ' + repository)
     
-def create_new_thread_default_dicionaries(argumentos):
-    thread = Thread(target=create_work_save_directory_in_json_file, args=[argumentos[0], argumentos[1], argumentos[2], argumentos[3], argumentos[4]], daemon=True)
+def create_new_thread_default_dictionaries(argumentos):
+    thread = Thread(target=create_work_save_dictionary_in_json_file, args=[argumentos[0], argumentos[1], argumentos[2], argumentos[3], argumentos[4]], daemon=True)
     display('It was created a new Thread ' + thread.getName() + ' to enqueue dictionary ')
     thread.start()
     display('Thread ' + thread.getName() + ' finished enqueueing of dictionary')
     return thread
 
 # Producer: the client send a dictionary to queue of dictionary
-def create_work_save_directory_in_json_file(client, nome, my_dictionary, queue, finished):
+def create_work_save_dictionary_in_json_file(client, nome, my_dictionary, queue, finished):
     #lock
     finished.put(False)
     # insert element in queue
@@ -148,7 +148,7 @@ def perform_work(app, work, finished):
             v = work.get()
             display(f'Consuming {counter}: {v}')
             print(f'Cloning repository {v[2]} from client {str(v[0])}')
-            create_new_thread(v[0],v[2])
+            create_new_thread_analyse_commits(v[0],v[2])
             create_new_thread_banco(app, v[2])
             processar_fila_dedicionarios_em_background(app, work_of_dictionaries, finished_of_dictionaries)
             counter += 1
@@ -161,7 +161,7 @@ def perform_work(app, work, finished):
             display(f'The item {v} has consumed with success!')
 
 def produzir_dicionario(client, nome, dicionario, work, finished):
-    thread = create_new_thread_default_dicionaries([client, nome, dicionario, work, finished])
+    thread = create_new_thread_default_dictionaries([client, nome, dicionario, work, finished])
     list_of_producers_dictionaries.append(thread)
         
     return 'produzido o dicionario'
