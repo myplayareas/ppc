@@ -28,6 +28,10 @@ package database <<Database>> {
   class myappdb
 }
 
+package messages <<Folder>> {
+  class message_adapter
+}
+
 package views <<Views>> {
   package m <<Folder>> {
     class listar
@@ -49,9 +53,11 @@ db --> myappdb
 main --> repositorios
 repositorios --> db
 main --> utilidades
+main --> message_adapter
 utilidades --> manipula_arquivos
 utilidades --> repositorios
 auth --> usuarios
+auth --> message_adapter
 usuarios --> db
 listar --> main 
 criar --> main
