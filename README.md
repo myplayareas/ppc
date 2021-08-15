@@ -43,3 +43,5 @@ flask run
 ![Tela Principal](https://github.com/myplayareas/ppc/blob/main/docs/TelaPrincipal.png)
 
 [![asciicast](https://asciinema.org/a/428602.svg)](https://asciinema.org/a/428602)
+
+You can find more datails in [wiki](https://github.com/myplayareas/ppc/wiki)
